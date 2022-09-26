@@ -1,0 +1,2 @@
+
+start = performance.now()
