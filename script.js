@@ -3,7 +3,6 @@
 // why is generation so slow now
 // medium
 // low
-// 
 
 import {MinQueue} from './node_modules/heapify/heapify.mjs'
 
