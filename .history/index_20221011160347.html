@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Algorithms</title>
+    <!-- <link rel="icon" type="image/x-icon" href=/images/favicon.ico"> -->
+    <link rel="stylesheet" href="styles.css">
+    <script type="module" src="script.js" defer></script>
+</head>
+<body>
+    <div class="buttonContainer">
+        <div class="generateContainer">
+            <input type="number" id="generateInput">
+            <button id="emptyButton">Empty Maze</button>
+            <button id="generateButton">Autogenerate</button>
+        </div>
+        <button id="breadthButton">Breadth</button>
+        <button id="depthButton">Depth</button>
+        <button id="aStarButton">A*</button>
+    </div>
+    <canvas width="700" height="700"></canvas>
+    <div class="radioGroupContainer">
+        <label for="wall" class="radioButtonContainer">
+            <input type="radio" id="wall" name="tileSelector" value="0" checked>
+            Wall
+        </label>
+        <label for="empty" class="radioButtonContainer">
+            <input type="radio" id="empty" name="tileSelector" value="1">
+            Path
+        </label>
+        <label for="start" class="radioButtonContainer">
+            <input type="radio" id="start" name="tileSelector" value="2">
+            Start
+        </label>
+        <label for="end" class="radioButtonContainer">
+            <input type="radio" id="end" name="tileSelector" value="3">
+            End
+        </label>
+    </div>
+</body>
+</html>

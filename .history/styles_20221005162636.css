@@ -1,0 +1,70 @@
+* {
+    margin: 0;
+    padding: 0;
+    font: 15px Arial;
+}
+
+body {
+    background-color: #1B2430;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+canvas {
+    background-color: #D6D5A8;
+    height: 85vmin;
+    aspect-ratio: 1 / 1;
+}
+
+.buttonContainer {
+    background-color: #393E46;
+    height: 100vh;
+    width: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+}
+
+.generateContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#generateInput {
+    width: 40px;
+}
+
+.radioGroupContainer {
+    background-color: #393E46;
+    height: 100vh;
+    width: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.radioButtonContainer {
+    background-color: white;
+    color: black;
+    margin: 5px 20px;
+    padding: 5px 10px;
+    border-radius: 20px;
+    user-select: none;
+    cursor: pointer;
+}
+
+.radioButtonContainer * {
+    cursor: pointer;
+}
+
+button {
+    margin: 20px;
+    border-radius: 20px;
+    padding: 5px;
+    cursor: pointer;
+}
