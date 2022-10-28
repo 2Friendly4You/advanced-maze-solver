@@ -1,7 +1,10 @@
 // TODO 
+
 // high
 // why is generation so slow now
+
 // medium
+
 // low
 
 import {MinQueue} from './node_modules/heapify/heapify.mjs'
@@ -358,10 +361,10 @@ function initMaze() {
         [0, 0, 0, 0, 0, 1, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0]
-    ]
+    ];
     let start = [0, 0];
-    let end = [7, 7];
-    maze.setProperties(grid2, start, end);
+    let end = [0, 5];
+    maze.setProperties(grid, start, end);
     maze.drawAll();
     return [canvas, maze];
 }
