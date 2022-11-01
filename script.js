@@ -43,8 +43,8 @@ Maze.prototype = {
                 if(typeof visited !== 'undefined' && visited.has([r, c].toString())) {
                     this.ctx.fillStyle = VISITED_COLOR;
                 }
-                this.ctx.fillRect(c * this.width, r * this.width, this.width + 1, this.width + 1);
-                this.ctx.strokeRect(c * this.width, r * this.width, this.width + 1, this.width + 1);
+                this.ctx.fillRect(c * this.width, r * this.width, this.width, this.width);
+                this.ctx.strokeRect(c * this.width, r * this.width, this.width, this.width);
             }
         }
         this.drawStartAndEnd();
@@ -61,8 +61,8 @@ Maze.prototype = {
         if(typeof visited !== 'undefined' && visited.has([r, c].toString())) {
             this.ctx.fillStyle = VISITED_COLOR;
         }
-        this.ctx.fillRect(c * this.width, r * this.width, this.width + 1, this.width + 1);
-        this.ctx.strokeRect(c * this.width, r * this.width, this.width + 1, this.width + 1);
+        this.ctx.fillRect(c * this.width, r * this.width, this.width, this.width);
+        this.ctx.strokeRect(c * this.width, r * this.width, this.width, this.width);
         if(arrayEquals(this.start, tile) || arrayEquals(this.end, tile)) {
             this.drawStartAndEnd();
         }
@@ -122,9 +122,13 @@ Maze.prototype = {
         return possAdjs.filter((possAdj) => this.checkMovable(possAdj));
     },
 
+    async clearTimeout() {
+        clearTimeout(this.timeoutID);
+    },
+
     async simpleSearch(type, delay) {
         console.assert(type === "depth" || type === "breadth");
-        clearTimeout(this.timeoutID);
+        this.clearTimeout();
         this.drawAll();
         let deque = [[this.start]];
         let visited = new Set();
@@ -160,7 +164,7 @@ Maze.prototype = {
     },
 
     async aStar(delay) {
-        clearTimeout(this.timeoutID);
+        this.clearTimeout();
         this.drawAll();
         const reconstructPath = (prev, tile) => {
             let current = tile;
@@ -241,7 +245,7 @@ Maze.prototype = {
     },
 
     async generate(size, delay) {
-        clearTimeout(this.timeoutID);
+        this.clearTimeout();
         this.setProperties(...prepareMaze(size));
         let genStart = generateRandomEvenCoord(this.grid.length);
         let stack = [[genStart, genStart]];
@@ -369,10 +373,23 @@ function initMaze() {
     return [canvas, maze];
 }
 
+function checkValidGridSizeInput(input) {
+    let num = Number(input.value);
+    if(Number.isInteger(num) && num >= 3) {
+        input.style.backgroundColor = "white";
+        return true;
+    }
+    else {
+        input.style.backgroundColor = "red";
+        alert("Value in text input must be a positive integer greater than or equal to 3")
+        return false;
+    }
+}
+
 function initControls(canvas, maze) {
     let emptyButton = document.getElementById("emptyButton")
     let generateButton = document.getElementById("generateButton");
-    let generateInput = document.getElementById("generateInput")
+    let gridSizeInput = document.getElementById("generateInput")
     let breadthButton = document.getElementById("breadthButton");
     let depthButton = document.getElementById("depthButton");
     let aStarButton = document.getElementById("aStarButton");
@@ -380,10 +397,16 @@ function initControls(canvas, maze) {
     // button events
     let DELAY = 50;
     emptyButton.addEventListener("click", () => {
-        maze.setProperties(...emptyMaze(generateInput.value, DELAY));
-        maze.drawAll();
-    })
-    generateButton.addEventListener("click", () => maze.generate(Number(generateInput.value), DELAY));
+        if(checkValidGridSizeInput(gridSizeInput)) {
+            maze.setProperties(...emptyMaze(gridSizeInput.value, DELAY));
+            maze.drawAll();
+        }
+    });
+    generateButton.addEventListener("click", () => {
+        if(checkValidGridSizeInput(gridSizeInput)) {
+            maze.generate(Number(gridSizeInput.value), DELAY);
+        }
+    });
     breadthButton.addEventListener("click", () => maze.simpleSearch("breadth", DELAY));
     depthButton.addEventListener("click", () => maze.simpleSearch("depth", DELAY));
     aStarButton.addEventListener("click", () => maze.aStar(DELAY));
@@ -410,6 +433,7 @@ function initControls(canvas, maze) {
 }
 
 function main() {
+    alert("The A* search algorithm is currently a work in progress. It is not yet properly implemented.");
     initControls(...initMaze());
     // testMinQueue();
 }
