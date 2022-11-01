@@ -10,38 +10,44 @@
     <script type="module" src="script.js" defer></script>
 </head>
 <body>
-    <div class="flexColumn buttonContainer">
-        <div class="flexColumn generateContainer">
-            <button id="emptyButton">Empty Maze</button>
-            <button id="generateButton">Autogenerate</button>
-            <label id="gridSizeInputLabel" for="generateInput">Grid Size:
-                <input id="generateInput" type="number" >
-            </label>
-        </div>
-        <div class="flexColumn">
-            <button id="breadthButton">Breadth</button>
-            <button id="depthButton">Depth</button>
-            <button id="aStarButton">A* (WIP)</button>
+    <div class="left">
+    <!-- <div class="flexRow"> -->
+        <!-- <button class="tabButton">Search</button> -->
+        <!-- <button class="tabButton">Edit</button> -->
+        <!-- <button class="tabButton">New Maze</button> -->
+    <!-- </div> -->
+        <div class="sidebar flexColumn">
+            <div class="flexColumn tabContent newMazeContainer">
+                <button id="emptyButton">Empty Maze</button>
+                <button id="generateButton">Autogenerate</button>
+                <!-- <label id="gridSizeInputLabel" for="gridSizeInput">Grid Size:</label> -->
+                <input id="gridSizeInput" type="number">
+            </div>
+            <div class="flexColumn tabContent searchContainer">
+                <button id="breadthButton">Breadth</button>
+                <button id="depthButton">Depth</button>
+                <button id="aStarButton">A* (WIP)</button>
+            </div>
+            <div class="flexColumn tabContent editContainer">
+                <label class="editLabel" for="wall">
+                    <input type="radio" name="tileSelector" id="wall" value="0" checked>
+                    Wall
+                </label>
+                <label class="editLabel" for="empty">
+                    <input type="radio" name="tileSelector" id="empty" value="1">
+                    Path
+                </label>
+                <label class="editLabel" for="start">
+                    <input type="radio" name="tileSelector" id="start" value="2">
+                    Start
+                </label>
+                <label class="editLabel" for="end">
+                    <input type="radio" name="tileSelector" id="end" value="3">
+                    End
+                </label>
+            </div>
         </div>
     </div>
     <canvas width="700" height="700"></canvas>
-    <div class="flexColumn radioContainer">
-        <label class="editLabel" for="wall">
-            <input type="radio" name="tileSelector" id="wall" value="0" checked>
-            Wall
-        </label>
-        <label class="editLabel" for="empty">
-            <input type="radio" name="tileSelector" id="empty" value="1">
-            Path
-        </label>
-        <label class="editLabel" for="start">
-            <input type="radio" name="tileSelector" id="start" value="2">
-            Start
-        </label>
-        <label class="editLabel" for="end">
-            <input type="radio" name="tileSelector" id="end" value="3">
-            End
-        </label>
-    </div>
 </body>
 </html>

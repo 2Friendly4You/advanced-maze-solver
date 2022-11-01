@@ -43,8 +43,8 @@ Maze.prototype = {
                 if(typeof visited !== 'undefined' && visited.has([r, c].toString())) {
                     this.ctx.fillStyle = VISITED_COLOR;
                 }
-                this.ctx.fillRect(c * this.width, r * this.width, this.width, this.width);
-                this.ctx.strokeRect(c * this.width, r * this.width, this.width, this.width);
+                this.ctx.fillRect(c * this.width, r * this.width, this.width + 1, this.width + 1);
+                this.ctx.strokeRect(c * this.width, r * this.width, this.width + 1, this.width + 1);
             }
         }
         this.drawStartAndEnd();
@@ -273,19 +273,26 @@ Maze.prototype = {
     click(x, y, mode) {
         let r = Math.floor(y / parseFloat(getComputedStyle(this.canvas).height) * this.grid.length);
         let c = Math.floor(x / parseFloat(getComputedStyle(this.canvas).width) * this.grid.length);
-        if(mode == 0) {
+        if(mode == 0 && this.grid[r][c] != 1) {
+            this.clearTimeout();
             this.grid[r][c] = 1;
+            this.drawAll();
         }
-        else if(mode == 1) {
+        else if(mode == 1 && this.grid[r][c] != 0) {
+            this.clearTimeout();
             this.grid[r][c] = 0;
+            this.drawAll();
         }
         else if(mode == 2 && this.grid[r][c] == 0) {
+            this.clearTimeout();
             this.start = [r, c];
+            this.drawAll();
         }
         else if(mode == 3 && this.grid[r][c] == 0) {
+            this.clearTimeout();
             this.end = [r, c];
+            this.drawAll();
         }
-        this.drawAll();
     }
 }
 
@@ -430,6 +437,12 @@ function initControls(canvas, maze) {
         }
     });
     canvas.addEventListener("click", (e) => maze.click(...getMousePos(e), getCheckedRadio()))
+}
+
+function openTab(tabName) {
+  let tabs = document.querySelectorAll(".tab");
+  tabs.forEach((tab) => tab.style.display = "none") 
+  document.getElementById(tabName).style.display = "block";
 }
 
 function main() {
