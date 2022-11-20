@@ -464,7 +464,7 @@ function initControls(canvas, maze) {
 }
 
 function main() {
-    // alert("The A* search algorithm is currently a work in progress. It is not yet properly implemented.");
+    alert("The A* search algorithm is currently a work in progress. It is not yet properly implemented.");
     initControls(...initMaze());
     // testMinQueue();
 }
