@@ -11,24 +11,24 @@
 </head>
 <body>
     <div class="left">
-    <!-- <div class="flexRow"> -->
-        <!-- <button class="tabButton">Search</button> -->
-        <!-- <button class="tabButton">Edit</button> -->
-        <!-- <button class="tabButton">New Maze</button> -->
-    <!-- </div> -->
+        <div class="flexRow">
+            <button id="searchTabButton" class="tabButton tabClicked">Search</button>
+            <button id="editTabButton" class="tabButton">Edit</button>
+            <button id="newMazeTabButton" class="tabButton">New Maze</button>
+        </div>
         <div class="sidebar flexColumn">
-            <div class="flexColumn tabContent newMazeContainer">
+            <div id="newMazeContainer" class="flexColumn tab">
                 <button id="emptyButton">Empty Maze</button>
                 <button id="generateButton">Autogenerate</button>
                 <!-- <label id="gridSizeInputLabel" for="gridSizeInput">Grid Size:</label> -->
                 <input id="gridSizeInput" type="number">
             </div>
-            <div class="flexColumn tabContent searchContainer">
+            <div id="searchContainer" class="flexColumn tab">
                 <button id="breadthButton">Breadth</button>
                 <button id="depthButton">Depth</button>
                 <button id="aStarButton">A* (WIP)</button>
             </div>
-            <div class="flexColumn tabContent editContainer">
+            <div id="editContainer" class="flexColumn tab">
                 <label class="editLabel" for="wall">
                     <input type="radio" name="tileSelector" id="wall" value="0" checked>
                     Wall

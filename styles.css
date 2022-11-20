@@ -2,6 +2,8 @@
     --clr-wall: #1B2430;
     --clr-sidebar: #393E46;
     --clr-light: #e8e8e8;
+    --clr-hover: #ddd;
+    --clr-click: #aaa;
 }
 
 * {
@@ -36,10 +38,11 @@ canvas {
 }
 
 .tabButton {
-    border-radius: 10px 10px 0px 0px;
+    border-radius: 0px;
+    margin: 0px !important;
 }
 
-.tabContent {
+.tab {
     background-color: var(--clr-wall);
     justify-content: center;
     width: 120px;
@@ -49,14 +52,14 @@ canvas {
     box-shadow: -3px -3px var(--clr-light);
 }
 
+.tabClicked {
+    background-color: var(--clr-click) !important;
+}
+
 .sidebar {
     background-color: var(--clr-sidebar);
     height: 100vh;
     justify-content: space-around;
-}
-
-.tabButton {
-    margin-top: 0px 0px 0px; 
 }
 
 #gridSizeInput {
@@ -68,16 +71,19 @@ canvas {
     color: white;
 }
 
-.editContainer {
+#editContainer {
+    display: none;
 }
 
-.newMazeContainer {
+#newMazeContainer {
+    display: none;
 }
 
-.searchContainer {
+#searchContainer {
+    display: flex;
 }
 
-.editLabel * {
+#editLabel * {
     cursor: pointer;
 }
 
@@ -93,9 +99,9 @@ button, .editLabel {
 }
 
 button:hover, .editLabel:hover {
-    background-color: #ddd;
+    background-color: var(--clr-hover);
 }
 
 button:active, .editLabel:active {
-    background-color: #aaa;
+    background-color: var(--clr-click);
 }

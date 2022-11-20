@@ -394,15 +394,39 @@ function checkValidGridSizeInput(input) {
 }
 
 function initControls(canvas, maze) {
-    let emptyButton = document.getElementById("emptyButton")
+    let searchTabButton = document.getElementById("searchTabButton");
+    let editTabButton = document.getElementById("editTabButton");
+    let newMazeTabButton = document.getElementById("newMazeTabButton");
+    let emptyButton = document.getElementById("emptyButton");
     let generateButton = document.getElementById("generateButton");
-    let gridSizeInput = document.getElementById("generateInput")
+    let gridSizeInput = document.getElementById("gridSizeInput")
     let breadthButton = document.getElementById("breadthButton");
     let depthButton = document.getElementById("depthButton");
     let aStarButton = document.getElementById("aStarButton");
 
+    let tabs = document.getElementsByClassName("tab");
+    let tabButtons = document.getElementsByClassName("tabButton");
+
     // button events
     let DELAY = 50;
+    
+    const openTab = (tabName, tabButtonName) => {
+        for(let tab of tabs) {
+            tab.style.display = "none";
+        }
+        document.getElementById(tabName).style.display = "flex";
+        for(let tabButton of tabButtons) {
+            // console.log(tabButton.className);
+            // console.log(tabButton.className.replace(" tabClicked", ""));
+            tabButton.className = tabButton.className.replace(" tabClicked", "");
+        }
+        document.getElementById(tabButtonName).className += " tabClicked";
+        // console.log(document.getElementById(tabButtonName).className);
+    }
+    searchTabButton.addEventListener("click", () => openTab("searchContainer", "searchTabButton"));
+    editTabButton.addEventListener("click", () => openTab("editContainer", "editTabButton"));
+    newMazeTabButton.addEventListener("click", () => openTab("newMazeContainer", "newMazeTabButton"));
+
     emptyButton.addEventListener("click", () => {
         if(checkValidGridSizeInput(gridSizeInput)) {
             maze.setProperties(...emptyMaze(gridSizeInput.value, DELAY));
@@ -439,14 +463,8 @@ function initControls(canvas, maze) {
     canvas.addEventListener("click", (e) => maze.click(...getMousePos(e), getCheckedRadio()))
 }
 
-function openTab(tabName) {
-  let tabs = document.querySelectorAll(".tab");
-  tabs.forEach((tab) => tab.style.display = "none") 
-  document.getElementById(tabName).style.display = "block";
-}
-
 function main() {
-    alert("The A* search algorithm is currently a work in progress. It is not yet properly implemented.");
+    // alert("The A* search algorithm is currently a work in progress. It is not yet properly implemented.");
     initControls(...initMaze());
     // testMinQueue();
 }
