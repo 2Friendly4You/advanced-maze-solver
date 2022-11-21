@@ -4,8 +4,11 @@
 // why is generation so slow now
 
 // medium
+// fix A*
 
 // low
+// new maze generation algorithms: random kruskal and prims
+// show what click will do when hovered (ghost)
 
 import {MinQueue} from './node_modules/heapify/heapify.mjs'
 
@@ -176,30 +179,30 @@ Maze.prototype = {
             return path
         }
 
-        const taxiCab = (tile) => Math.abs(this.end[0] - tile[0]) + Math.abs(this.end[1] - tile[1]);
         const euclidDist = (tile) => Math.sqrt(Math.pow(this.end[0] - tile[0], 2) + Math.pow(this.end[1] - tile[1], 2));
-        const tileToInt = (tile) => tile[0] * this.grid[0].length + tile[1];
-        const intToTile = (num) => [Math.floor(num / this.grid[0].length), num % this.grid[0].length]
+        const taxiCab = (tile) => Math.abs(this.end[0] - tile[0]) + Math.abs(this.end[1] - tile[1]);
 
-        let priorityQueue = new MinQueue();
-        priorityQueue.push(tileToInt(this.start), 0);
-
-        // TODO: change to actual hashmaps
-        let minDistFromStart = {};
+        let pq = [[0, this.start]];
+        console.log(pq);
+        let dist = {};
         let prev = {};
         let visited = new Set();
         for(let r = 0; r < this.grid.length; r++) {
             for(let c = 0; c < this.grid[0].length; c++) {
-                minDistFromStart[[r, c]] = Infinity;
+                dist[[r, c]] = Infinity;
             }
         }
-        minDistFromStart[this.start] = 0;
-        const searchStep = (delay, visited, priorityQueue, minDistFromStart, prev) => {
-            let currDist = priorityQueue.peekPriority();
-            let currTile = intToTile(priorityQueue.pop());
+        dist[this.start] = 0;
+        const searchStep = (delay, visited, pq, dist, prev) => {
+            if(pq.length === 0) {
+                return;
+            }
+            pq = pq.sort((a, b) => a[0] - b[0]);
+            let [currDist, currTile] = pq[0];
+            pq.splice(0, 1);
             console.log(`currTile: ${currTile} currDist: ${currDist}`);
             if(visited.has(currTile.toString())) {
-                return searchStep(delay, visited, priorityQueue, minDistFromStart, prev);
+                return searchStep(delay, visited, pq, dist, prev);
             }
             visited.add(currTile.toString());
             this.drawTile(currTile, visited);
@@ -209,22 +212,22 @@ Maze.prototype = {
                 return path;
             }
             for(const adj of this.getAdjs(currTile)) {
-                let newMinDistFromStart = minDistFromStart[currTile] + 1;
-                if(newMinDistFromStart < minDistFromStart[adj]) {
+                let newDist = dist[currTile] + 1;
+                if(newDist < dist[adj]) {
+                    dist[adj] = newDist;
                     prev[adj] = currTile;
-                    minDistFromStart[adj] = newMinDistFromStart;
-                    let newEstimatedDist = newMinDistFromStart + taxiCab(adj);
+                    let newEstimatedDist = newDist + taxiCab(adj);
                     // console.log(`taxi cab of ${adj}: ${taxiCab(adj)}`);
                     // console.log(`euclid dist of ${adj}: ${euclidDist(adj)}`);
                     // console.log(`newMinDistFromStart: ${newMinDistFromStart}`);
                     // console.log(`new estimated dist: ${newEstimatedDist}`);
-                    console.log(`adding ${adj}`);
-                    priorityQueue.push(tileToInt(adj), newEstimatedDist);
+                    console.log(`adding ${adj} with priority ${newEstimatedDist}`);
+                    pq.unshift([newEstimatedDist, adj]);
                 }
             }
-            return new Promise((resolve) => this.timeoutID = setTimeout(() => resolve(searchStep(delay, visited, priorityQueue, minDistFromStart, prev)), delay));
+            return new Promise((resolve) => this.timeoutID = setTimeout(() => resolve(searchStep(delay, visited, pq, dist, prev)), delay));
         }
-        return await searchStep(delay, visited, priorityQueue, minDistFromStart, prev);
+        return await searchStep(delay, visited, pq, dist, prev);
     },
 
     getGenerationAdjs(curr) {
@@ -270,7 +273,10 @@ Maze.prototype = {
         return await generateStep(stack, visited, delay);
     },
 
-    click(x, y, mode) {
+    click(x, y, mode, editTabButton) {
+        if(!editTabButton.className.includes("clicked")) {
+            return;
+        }
         let r = Math.floor(y / parseFloat(getComputedStyle(this.canvas).height) * this.grid.length);
         let c = Math.floor(x / parseFloat(getComputedStyle(this.canvas).width) * this.grid.length);
         if(mode == 0 && this.grid[r][c] != 1) {
@@ -330,14 +336,7 @@ function prepareMaze(size) {
 }
 
 function emptyMaze(size) {
-    let grid = [];
-    for(let r = 0; r < size; r++) {
-        let row = [];
-        for(let c = 0; c < size; c++) {
-            row.push(0);
-        }
-        grid.push(row);
-    }
+    let grid = Array(size).fill().map(() => Array(size).fill(0));
     let start = [0, 0];
     let end = [size - 1, size - 1];
     return [grid, start, end];
@@ -364,14 +363,11 @@ function initMaze() {
         [0, 0, 0, 0, 0, 1, 0],
     ];
     let grid2 = [
-        [0, 0, 0, 0, 0, 1, 0, 0],
-        [0, 0, 0, 0, 0, 1, 0, 0],
-        [0, 0, 0, 0, 0, 1, 0, 0],
-        [0, 0, 0, 0, 0, 1, 0, 0],
-        [0, 0, 0, 0, 0, 1, 0, 0],
-        [0, 0, 0, 0, 0, 1, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0]
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 1, 0],
+        [0, 0, 0, 1, 0],
+        [0, 0, 0, 1, 0],
+        [0, 0, 0, 1, 0]
     ];
     let start = [0, 0];
     let end = [0, 5];
@@ -410,26 +406,32 @@ function initControls(canvas, maze) {
     // button events
     let DELAY = 50;
     
-    const openTab = (tabName, tabButtonName) => {
+    const openTab = (clickedTabName, clickedTabButton) => {
+        if(clickedTabButton.className.includes("clicked")) {
+            return;
+        }
         for(let tab of tabs) {
             tab.style.display = "none";
         }
-        document.getElementById(tabName).style.display = "flex";
+        document.getElementById(clickedTabName).style.display = "flex";
         for(let tabButton of tabButtons) {
-            // console.log(tabButton.className);
-            // console.log(tabButton.className.replace(" tabClicked", ""));
-            tabButton.className = tabButton.className.replace(" tabClicked", "");
+            tabButton.className = tabButton.className.replace(" clicked", "");
         }
-        document.getElementById(tabButtonName).className += " tabClicked";
-        // console.log(document.getElementById(tabButtonName).className);
+        clickedTabButton.className += " clicked";
+        if(clickedTabButton === editTabButton) {
+            canvas.className += " clickable";
+        }
+        else {
+            canvas.className = canvas.className.replace(" clickable", "");
+        }
     }
-    searchTabButton.addEventListener("click", () => openTab("searchContainer", "searchTabButton"));
-    editTabButton.addEventListener("click", () => openTab("editContainer", "editTabButton"));
-    newMazeTabButton.addEventListener("click", () => openTab("newMazeContainer", "newMazeTabButton"));
+    searchTabButton.addEventListener("click", () => openTab("searchContainer", searchTabButton));
+    editTabButton.addEventListener("click", () => openTab("editContainer", editTabButton));
+    newMazeTabButton.addEventListener("click", () => openTab("newMazeContainer", newMazeTabButton));
 
     emptyButton.addEventListener("click", () => {
         if(checkValidGridSizeInput(gridSizeInput)) {
-            maze.setProperties(...emptyMaze(gridSizeInput.value, DELAY));
+            maze.setProperties(...emptyMaze(Number(gridSizeInput.value), DELAY));
             maze.drawAll();
         }
     });
@@ -457,27 +459,14 @@ function initControls(canvas, maze) {
     }
     canvas.addEventListener("mousemove", (e) => {
         if(mouseDown) {
-            maze.click(...getMousePos(e), getCheckedRadio());
+            maze.click(...getMousePos(e), getCheckedRadio(), editTabButton);
         }
     });
-    canvas.addEventListener("click", (e) => maze.click(...getMousePos(e), getCheckedRadio()))
+    canvas.addEventListener("click", (e) => maze.click(...getMousePos(e), getCheckedRadio(), editTabButton))
 }
 
 function main() {
-    alert("The A* search algorithm is currently a work in progress. It is not yet properly implemented.");
     initControls(...initMaze());
-    // testMinQueue();
-}
-
-function testMinQueue() {
-    let heap = new MinQueue(100);
-    let n = 100;
-    for(let i = 1; i < n; i++) {
-        heap.push(i, 1);
-    }
-    while(heap.size != 0) {
-        console.log(heap.pop());
-    }
 }
 
 main();

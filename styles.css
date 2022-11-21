@@ -19,6 +19,7 @@ body {
     display: flex;
     justify-content: left;
     align-items: center;
+    overflow: hidden;
 }
 
 canvas {
@@ -42,18 +43,23 @@ canvas {
     margin: 0px !important;
 }
 
+.clicked {
+    background-color: var(--clr-click) !important;
+}
+
+.clickable:hover {
+    cursor: pointer;
+}
+
 .tab {
     background-color: var(--clr-wall);
     justify-content: center;
-    width: 120px;
+    width: 75%;
+    height: 50%;
     border-radius: 15px;
     padding: 15px 5px;
     margin: 20px;
     box-shadow: -3px -3px var(--clr-light);
-}
-
-.tabClicked {
-    background-color: var(--clr-click) !important;
 }
 
 .sidebar {
