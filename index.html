@@ -18,8 +18,10 @@
         </div>
         <div class="sidebar flexColumn">
             <div id="newMazeContainer" class="flexColumn tab">
-                <button id="emptyButton">Empty Maze</button>
-                <button id="generateButton">Autogenerate</button>
+                <button id="emptyButton">Empty Grid</button>
+                <button id="randomDFSButton">Depth</button>
+                <button id="randomPrimsButton">Prim's</button>
+                <button id="randomKruskalsButton">Kruskal's</button>
                 <label id="gridSizeInputLabel" for="gridSizeInput">Grid Size:
                     <input id="gridSizeInput" type="number">
                 </label>
@@ -27,7 +29,7 @@
             <div id="searchContainer" class="flexColumn tab">
                 <button id="breadthButton">Breadth</button>
                 <button id="depthButton">Depth</button>
-                <button id="aStarButton">A* (WIP)</button>
+                <button id="aStarButton">A*</button>
             </div>
             <div id="editContainer" class="flexColumn tab">
                 <label class="editLabel" for="wall">
