@@ -6,7 +6,6 @@
   "version": "1.0.0",
   "description": "searches a 2d grid maze with graph search algorithms like breadth-first, depth-first, and a*",
   "main": "script.js",
-  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
