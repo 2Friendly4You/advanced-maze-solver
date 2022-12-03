@@ -1,20 +1,21 @@
 // TODO 
 
 // high
-// why is generation so slow now
+// change start of search to only draw_all if visited is not empty, use existing function inside edit
 
 // medium
+// general performance, check everything is fast
 
 // low
 // show what click will do when hovered (ghost)
 // options turn gridlines off
 
-import {Maze} from './maze.js';
+import {Maze, square_array} from './maze.js';
 
 const DELAY = 50;
 
 function empty_maze(size) {
-    let grid = Array(size).fill().map(() => Array(size).fill(0));
+    let grid = square_array(size, false);
     let start = [0, 0];
     let end = [size - 1, size - 1];
     return [grid, start, end];

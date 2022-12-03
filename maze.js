@@ -21,11 +21,16 @@ export class Maze {
         this.start = start;
         this.end = end;
         this.width = this.canvas.width / this.grid.length;
+        this.visited = Array(this.size).fill().map(() => Array(this.size).fill(false));
         this.timeoutID = undefined;
     }
 
     async clear_timeout() {
         clearTimeout(this.timeoutID);
+    }
+
+    clear_visited() {
+        this.visited = Array(this.size).fill().map(() => Array(this.size).fill(false));
     }
 
     draw_all() {
@@ -34,66 +39,51 @@ export class Maze {
                 this.draw_tile([r, c]);
             }
         }
-        this.draw_start_and_end();
     }
 
-    draw_tile(tile, visited) {
+    draw_circle(tile, color) {
+        this.ctx.beginPath();
+        this.ctx.arc(tile[1] * this.width + this.width / 2, tile[0] * this.width + this.width / 2, this.width / 2.5, 0, Math.PI * 2);
+        this.ctx.fillStyle = color;
+        this.ctx.fill();
+    }
+
+    draw_tile(tile) {
         let [r, c] = tile;
         this.ctx.fillStyle = EMPTY_COLOR;
         this.ctx.strokeStyle = WALL_COLOR;
         this.ctx.lineWidth = .5;
-        if(this.grid[r][c] == 1) {
+        if(this.grid[r][c] == 1)
             this.ctx.fillStyle = WALL_COLOR;
-        }
-        if(typeof visited !== 'undefined' && visited[r, c]) {
+        else if(this.visited[r][c])
             this.ctx.fillStyle = VISITED_COLOR;
-        }
         this.ctx.fillRect(c * this.width, r * this.width, this.width, this.width);
         this.ctx.strokeRect(c * this.width, r * this.width, this.width, this.width);
-        if(typeof visited !== 'undefined' && (array_equals(this.start, tile) || array_equals(this.end, tile))) {
-            this.draw_start_and_end();
-        }
-    }
-
-    draw_start_and_end() {
-        const draw_circle = (tile, color) => {
-            this.ctx.beginPath();
-            this.ctx.arc(tile[1] * this.width + this.width / 2, tile[0] * this.width + this.width / 2, this.width / 2.5, 0, Math.PI * 2);
-            this.ctx.fillStyle = color;
-            this.ctx.fill();
-        };
-        draw_circle(this.start, START_COLOR, this.width / 2.5);
-        draw_circle(this.end, END_COLOR, this.width / 2.5);
+        if(array_equals(tile, this.start))
+            this.draw_circle(this.start, START_COLOR);
+        if(array_equals(tile, this.end))
+            this.draw_circle(this.end, END_COLOR);
     }
 
     draw_path(path) {
         let middle = .35;
         let edge = (1 - middle) / 2;
-        this.ctx.fillStyle = PATH_COLOR;
         let w = this.width;
+        this.ctx.fillStyle = PATH_COLOR;
         for(let i = 0; i < path.length - 1; i++) {
             let curr = path[i];
             let next = path[i + 1];
             let [r, c] = curr;
-            let direction = [curr[0] - next[0], curr[1] - next[1]];
-            // left
-            if(array_equals(direction, [0, 1])) {
-                this.ctx.fillRect((c - edge) * w, (r + edge) * w, (2 * edge + middle) * w + 1, middle * w + 1);
-            };
-            // right
-            if(array_equals(direction, [0, -1])) {
-                this.ctx.fillRect((c + edge) * w, (r + edge) * w, (2 * edge + middle) * w + 1, middle * w + 1);
-            };
-            // down
-            if(array_equals(direction, [-1, 0])) {
-                this.ctx.fillRect((c + edge) * w, (r + edge) * w, middle * w + 1, (2 * edge + middle) * w + 1);
-            };
-            // up
-            if(array_equals(direction, [1, 0])) {
-                this.ctx.fillRect((c + edge) * w, (r - edge) * w, middle * w + 1, (2 * edge + middle) * w + 1);
-            };
+            let direction = [next[0] - curr[0], next[1] - curr[1]];
+            // left and right
+            if(direction[0] === 0)
+                this.ctx.fillRect((c + direction[1] * edge) * w, (r + edge) * w, (2 * edge + middle) * w + 1, middle * w + 1);
+            // up and down
+            if(direction[1] == 0)
+                this.ctx.fillRect((c + edge) * w, (r + direction[0] * edge) * w, middle * w + 1, (2 * edge + middle) * w + 1);
         }
-        this.draw_start_and_end();
+        this.draw_circle(this.start, START_COLOR);
+        this.draw_circle(this.end, END_COLOR);
     }
 
     check_movable(curr) {
@@ -105,7 +95,7 @@ export class Maze {
 
 //  maze searching
 
-    getAdjs(tile) {
+    get_adjs(tile) {
         let [r, c] = tile;
         let poss_adjs = [[r - 1, c], [r, c + 1], [r + 1, c], [r, c - 1]];
         return poss_adjs.filter((poss_adj) => this.check_movable(poss_adj));
@@ -114,41 +104,39 @@ export class Maze {
     async simple_search(type, delay) {
         console.assert(type === "depth" || type === "breadth");
         this.clear_timeout();
+        this.visited = square_array(this.size, false);
         this.draw_all();
         let deque = [[this.start]];
-        let visited = Array(this.size).fill().map(() => Array(this.size).fill(false));
-        const step = (delay, deque, visited, type) => {
-            if(deque.length == 0) {
+        const step = () => {
+            if(deque.length == 0)
                 return;
-            }
             let path;
-            if(type === "depth") {
+            if(type === "depth")
                 path = deque.pop();
-            }
-            else {
+            else
                 path = deque.shift();
-            }
             let curr = path[path.length - 1];
-            if(visited[curr[0]][curr[1]]) {
-                return step(delay, deque, visited, type);
-            }
-            visited[curr[0]][curr[1]] = true;
-            this.draw_tile(curr, visited);
+            let [r, c] = curr;
+            if(this.visited[r][c])
+                return step();
+            this.visited[r][c] = true;
+            this.draw_tile(curr);
             if(array_equals(curr, this.end)) {
                 this.draw_path(path);
                 return path;
             }
             // TODO maybe reverse for depth or breadth
-            for (const adj of this.getAdjs(curr)) {
+            for(const adj of this.get_adjs(curr)) {
                 deque.push([...path, adj]);
             }
-            return new Promise((resolve) => this.timeoutID = setTimeout(() => resolve(step(delay, deque, visited, type)), delay));
+            return new Promise((resolve) => this.timeoutID = setTimeout(() => resolve(step()), delay));
         };
-        return await step(delay, deque, visited, type);
+        return await step();
     }
 
     async a_star(delay) {
         this.clear_timeout();
+        this.visited = square_array(this.size, false);
         this.draw_all();
         const reconstruct_path = (prev, tile) => {
             let current = tile;
@@ -163,7 +151,6 @@ export class Maze {
         let pq = [[0, this.start]];
         let dist = {};
         let prev = {};
-        let visited = Array(this.size).fill().map(() => Array(this.size).fill(false));
         for (let r = 0; r < this.size; r++) {
             for (let c = 0; c < this.size; c++) {
                 dist[[r, c]] = Infinity;
@@ -176,19 +163,20 @@ export class Maze {
             }
             pq = pq.sort((a, b) => a[0] - b[0]);
             let [curr_dist, curr_tile] = pq[0];
+            let [r, c] = curr_tile;
             pq.splice(0, 1);
             // console.log(`currTile: ${currTile} currDist: ${currDist}`);
-            if(visited[curr_tile[0]][curr_tile[1]]) {
+            if(this.visited[r][c]) {
                 return step();
             }
-            visited[curr_tile[0]][curr_tile[1]] = true;
-            this.draw_tile(curr_tile, visited);
+            this.visited[r][c] = true;
+            this.draw_tile(curr_tile);
             if (array_equals(curr_tile, this.end)) {
                 let path = reconstruct_path(prev, curr_tile);
                 this.draw_path(path);
                 return path;
             }
-            for (const adj of this.getAdjs(curr_tile)) {
+            for (const adj of this.get_adjs(curr_tile)) {
                 let new_dist = dist[curr_tile] + 1;
                 if (new_dist < dist[adj]) {
                     dist[adj] = new_dist;
@@ -222,7 +210,7 @@ export class Maze {
         this.draw_all();
         let gen_start = random_even_coord(size);
         let stack = [new Edge(gen_start, gen_start)];
-        let visited = Array(size).fill().map(() => Array(size).fill(false));
+        let added = square_array(this.size, false);
         const shuffle = (arr) => {
             return arr
                 .map(val => ({val, sort: Math.random()}))
@@ -233,14 +221,13 @@ export class Maze {
             if(stack.length === 0)
                 return;
             let edge = stack.pop();
-            if(visited[edge.to[0]][edge.to[1]])
+            if(added[edge.to[0]][edge.to[1]])
                 return step();
-            visited[edge.to[0]][edge.to[1]] = true;
+            added[edge.to[0]][edge.to[1]] = true;
             let wall = edge.get_middle();
             this.grid[wall[0]][wall[1]] = 0;
             stack.push(...shuffle(this.get_generation_adjs(edge.to)));
             this.draw_tile(wall);
-            this.draw_start_and_end();
             return new Promise((resolve) => this.timeoutID = setTimeout(() => resolve(step()), delay));
         };
         return await step();
@@ -252,24 +239,23 @@ export class Maze {
         this.draw_all();
         let gen_start = random_even_coord(size);
         let edges = [new Edge(gen_start, gen_start)];
-        let visited = Array(size).fill().map(() => Array(size).fill(false));
+        let added = square_array(this.size, false);
         const step = () => {
             if(edges.length === 0)
                 return
             let ind = Math.floor(Math.random() * edges.length);
             let edge = edges[ind];
             edges.splice(ind, 1);
-            if(visited[edge.to[0]][edge.to[1]])
-                return step(edges, visited, delay);
-            visited[edge.to[0]][edge.to[1]] = true;
+            if(added[edge.to[0]][edge.to[1]])
+                return step(edges, added, delay);
+            added[edge.to[0]][edge.to[1]] = true;
             let wall = edge.get_middle();
             this.grid[wall[0]][wall[1]] = 0;
             edges.push(...this.get_generation_adjs(edge.to));
             this.draw_tile(wall);
-            this.draw_start_and_end();
-            return new Promise((resolve) => this.timeoutID = setTimeout(() => resolve(step(edges, visited, delay)), delay));
+            return new Promise((resolve) => this.timeoutID = setTimeout(() => resolve(step(edges, added, delay)), delay));
         };
-        return await step(edges, visited, delay);
+        return await step(edges, added, delay);
     }
 
     async kruskals(size, delay) {
@@ -306,7 +292,6 @@ export class Maze {
             let wall = edge.get_middle();
             this.grid[wall[0]][wall[1]] = 0;
             this.draw_tile(wall);
-            this.draw_start_and_end();
             return new Promise((resolve) => this.timeoutID = setTimeout(() => resolve(step()), delay));
         };
         return await step();
@@ -315,37 +300,41 @@ export class Maze {
     edit(x, y, mode, edit_tab_button) {
         if(!edit_tab_button.className.includes("clicked"))
             return;
-        // const 
         let r = Math.floor(y / parseFloat(getComputedStyle(this.canvas).height) * this.size);
         let c = Math.floor(x / parseFloat(getComputedStyle(this.canvas).width) * this.size);
-        if (mode == 0 && this.grid[r][c] != 1) {
+        const clear_visited = () => {
+            if(this.visited.some((row) => row.includes(true))) {
+                this.visited = square_array(this.size, false);
+                this.draw_all();
+            }
+        }
+        const update_tiles = (tiles) => {
             this.clear_timeout();
+            clear_visited();
+            for(const tile of tiles) {
+                this.draw_tile(tile);
+            }
+        }
+        if(mode === 0 && this.grid[r][c] != 1) {
             this.grid[r][c] = 1;
-            this.draw_tile([r, c]);
+            update_tiles([[r, c]]);
         }
-        else if (mode == 1 && this.grid[r][c] != 0) {
-            this.clear_timeout();
+        else if (mode === 1 && this.grid[r][c] != 0) {
             this.grid[r][c] = 0;
-            this.draw_tile([r, c]);
+            update_tiles([[r, c]]);
         }
-        else if (mode == 2 && this.grid[r][c] == 0) {
-            this.clear_timeout();
-            let old_start = this.start;
+        else if(mode === 2 && this.grid[r][c] == 0) {
+            const old_start = this.start;
             this.start = [r, c];
-            this.draw_tile(old_start);
-            this.draw_start_and_end();
+            update_tiles([[r, c], old_start]);
         }
-        else if (mode == 3 && this.grid[r][c] == 0) {
+        else if(mode === 3 && this.grid[r][c] == 0) {
             let old_end = this.end;
-            this.clear_timeout();
             this.end = [r, c];
-            this.draw_tile(old_end);
-            this.draw_start_and_end();
-            
+            update_tiles([[r, c], old_end]);
         }
     }
 }
-
 
 function random_even_coord(size) {
     const random_even_number = () => Math.floor(Math.random() * Math.floor((size + 1) / 2)) * 2;
@@ -376,4 +365,8 @@ function array_equals(a, b) {
         Array.isArray(b) &&
         a.length === b.length &&
         a.every((val, ind) => val === b[ind]);
+}
+
+export function square_array(size, val) {
+    return Array(size).fill().map(() => Array(size).fill(val));
 }
