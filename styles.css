@@ -12,6 +12,11 @@
     font: 15px Arial;
 }
 
+:root {
+    width: 100%;
+    height: 100%;
+}
+
 body {
     background-color: var(--clr-wall);
     width: 100%;
@@ -19,17 +24,13 @@ body {
     display: flex;
     justify-content: left;
     align-items: center;
-    overflow: hidden;
+    /* overflow: hidden; */
 }
 
 canvas {
+    margin: auto;
     background-color: var(--clr-sidebar);
-    height: 85vmin;
-    aspect-ratio: 1 / 1;
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%,-50%);
+    z-index: -1;
 }
 
 .flexColumn {
@@ -62,10 +63,21 @@ canvas {
     box-shadow: -3px -3px var(--clr-light);
 }
 
+.left {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
 .sidebar {
     background-color: var(--clr-sidebar);
-    height: 100vh;
+    height: 100%;
     justify-content: space-around;
+}
+
+#modeSelector {
+    display: flex;
+    flex-direction: row;
 }
 
 #gridSizeInput {
@@ -110,4 +122,30 @@ button:hover, .editLabel:hover {
 
 button:active, .editLabel:active {
     background-color: var(--clr-click);
+}
+
+@media (max-width: 800px) {
+    body {
+        flex-direction: column;
+    }
+    .left {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+    }
+    .sidebar {
+        flex-direction: row;
+        width: 100%;
+    }
+    .tab {
+        flex-direction: row;
+    }
+    .tab * {
+        margin: 5px;
+    }
+    #modeSelector {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
 }
