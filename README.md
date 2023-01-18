@@ -1,4 +1,7 @@
 # advanced-maze-solver
+
+https://blahnikkai.github.io/advanced-maze-solver/
+
 Maze solver and generator for the browser
 
 Solves mazes with breadth-first, depth-first, and A* (WIP) search, displays path from start to end
