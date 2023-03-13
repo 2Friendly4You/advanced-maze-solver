@@ -8,4 +8,4 @@ Solves mazes with breadth-first, depth-first, and A* search, displays path from 
 
 Can generate mazes with a radomized form of depth-first traversal, Prim's algorithm, and Kruskal's algorithm
 
-Users can create maze themselves or use a randomized depth-first search to automatically generate a maze and then edit it as they wish
+Users can create maze themselves or use generate a maze and then edit it
