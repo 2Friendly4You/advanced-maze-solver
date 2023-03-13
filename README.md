@@ -1,6 +1,6 @@
 # advanced-maze-solver
 
-blahnikkai.github.io/advanced-maze-solver/
+https://blahnikkai.github.io/advanced-maze-solver/
 
 Maze solver and generator for the browser
 
