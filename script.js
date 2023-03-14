@@ -1,7 +1,7 @@
 // TODO 
 
 // high
-// change start of search to only draw_all if visited is not empty, use existing function inside edit
+// change start of search to only draw_all if visited is not empty, use existing function inside edit 
 
 // medium
 // general performance, check everything is fast
