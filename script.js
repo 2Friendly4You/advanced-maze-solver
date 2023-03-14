@@ -11,12 +11,7 @@
 // options turn gridlines off
 
 import {Maze, square_array} from './maze.js';
-import {Maze, square_array} from './maze.js';
 
-const DELAY = 50;
-
-function empty_maze(size) {
-    let grid = square_array(size, false);
 const DELAY = 50;
 
 function empty_maze(size) {
@@ -26,7 +21,6 @@ function empty_maze(size) {
     return [grid, start, end];
 }
 
-function init_maze() {
 function init_maze() {
     let canvas = document.querySelector("canvas");
     let ctx = canvas.getContext("2d");
@@ -49,7 +43,6 @@ function init_maze() {
     return [canvas, maze];
 }
 
-function valid_grid_size(input) {
 function valid_grid_size(input) {
     let num = Number(input.value);
     if(Number.isInteger(num) && num >= 3) {
@@ -111,10 +104,6 @@ function init_controls(canvas, maze) {
         if(valid_grid_size(grid_size_input)) {
             maze.clear_timeout();
             func(Number(grid_size_input.value), DELAY);
-    const generate = (func) => {
-        if(valid_grid_size(grid_size_input)) {
-            maze.clear_timeout();
-            func(Number(grid_size_input.value), DELAY);
         }
     }
     random_dfs_button.addEventListener("click", () => generate(maze.depth.bind(maze)));
@@ -130,13 +119,9 @@ function init_controls(canvas, maze) {
     canvas.addEventListener("mousedown", () => mouseDown = true);
     document.addEventListener("mouseup", () => mouseDown = false);
     const mouse_pos = (e) => {
-    const mouse_pos = (e) => {
         const rect = canvas.getBoundingClientRect();
         return [e.clientX - rect.left,  e.clientY - rect.top];
-        return [e.clientX - rect.left,  e.clientY - rect.top];
     }
-    const checked_radio = () => {
-        return Number(document.querySelector('input[name="tileSelector"]:checked').value);
     const checked_radio = () => {
         return Number(document.querySelector('input[name="tileSelector"]:checked').value);
     }
@@ -147,11 +132,9 @@ function init_controls(canvas, maze) {
         }
     });
     canvas.addEventListener("click", (e) => maze.edit(...mouse_pos(e), checked_radio(), edit_tab_button))
-    canvas.addEventListener("click", (e) => maze.edit(...mouse_pos(e), checked_radio(), edit_tab_button))
 }
 
 function main() {
-    init_controls(...init_maze());
     init_controls(...init_maze());
 }
 
