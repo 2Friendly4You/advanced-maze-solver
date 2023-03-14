@@ -10,26 +10,19 @@
     <script type="module" src="script.js" defer></script>
 </head>
 <body>
-    <div class="left">
-        <div id="modeSelector">
-            <button id="searchTabButton" class="tabButton clicked">Search</button>
-            <button id="editTabButton" class="tabButton">Edit</button>
-            <button id="newMazeTabButton" class="tabButton">New Maze</button>
+    <div class="controls">
+        <div id="tab_selector">
+            <button id="search_tab_button" class="tab_button clicked">Search</button>
+            <button id="edit_tab_button" class="tab_button">Edit</button>
+            <button id="new_maze_tab_button" class="tab_button">New Maze</button>
         </div>
-        <div class="sidebar flexColumn">
-            <div id="newMazeContainer" class="flexColumn tab">
-                <button id="emptyButton">Empty Maze</button>
-                <button id="generateButton">Autogenerate</button>
-                <label id="gridSizeInputLabel" for="gridSizeInput">Grid Size:
-                    <input id="gridSizeInput" type="number">
-                </label>
-            </div>
-            <div id="searchContainer" class="flexColumn tab">
+        <div class="sidebar">
+            <div id="search_tab" class="tab_content">
                 <button id="breadthButton">Breadth</button>
                 <button id="depthButton">Depth</button>
-                <button id="aStarButton">A* (WIP)</button>
+                <button id="aStarButton">A*</button>
             </div>
-            <div id="editContainer" class="flexColumn tab">
+            <div id="edit_tab" class="tab_content">
                 <label class="editLabel" for="wall">
                     <input type="radio" name="tileSelector" id="wall" value="0" checked>
                     Wall
@@ -45,6 +38,15 @@
                 <label class="editLabel" for="end">
                     <input type="radio" name="tileSelector" id="end" value="3">
                     End
+                </label>
+            </div>
+            <div id="new_maze_tab" class="tab_content">
+                <button id="empty_button">Empty Grid</button>
+                <button id="random_dfs_button">Depth</button>
+                <button id="prims_button">Prim's</button>
+                <button id="kruskals_button">Kruskal's</button>
+                <label id="grid_size_input_label" for="grid_size_input">Grid Size:
+                    <input id="grid_size_input" type="number">
                 </label>
             </div>
         </div>

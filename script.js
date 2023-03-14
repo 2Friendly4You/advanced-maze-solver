@@ -1,355 +1,27 @@
 // TODO 
 
 // high
-// why is generation so slow now
+// change start of search to only draw_all if visited is not empty, use existing function inside edit
 
 // medium
-// fix A*
+// general performance, check everything is fast
 
 // low
-// new maze generation algorithms: random kruskal and prims
 // show what click will do when hovered (ghost)
+// options turn gridlines off
 
-import {MinQueue} from './node_modules/heapify/heapify.mjs'
+import {Maze, square_array} from './maze.js';
 
-const EMPTY_COLOR = "#D6D5A8";
-const WALL_COLOR = "#1B2430";
-const VISITED_COLOR = "#808080";
-const PATH_COLOR = "#FF2E63"
-const START_COLOR = "#F08A5D"
-const END_COLOR = "#4E9F3D"
+const DELAY = 50;
 
-function Maze(canvas, ctx) {
-    this.canvas = canvas
-    this.ctx = ctx;
-}
-
-Maze.prototype = {
-
-    setProperties(grid, start, end) {
-        this.grid = grid;
-        this.start = start;
-        this.end = end;
-        this.width = this.canvas.width / this.grid.length;
-        this.timeoutID = undefined;
-    },
-
-    drawAll(visited) {
-        for(let r = 0; r < this.grid.length; ++r) {
-            for(let c = 0; c < this.grid[0].length; ++c) {
-                this.ctx.fillStyle = EMPTY_COLOR;
-                this.ctx.strokeStyle = WALL_COLOR;
-                this.ctx.lineWidth = .5;
-                if(this.grid[r][c] == 1) {
-                    this.ctx.fillStyle = WALL_COLOR;
-                }
-                if(typeof visited !== 'undefined' && visited.has([r, c].toString())) {
-                    this.ctx.fillStyle = VISITED_COLOR;
-                }
-                this.ctx.fillRect(c * this.width, r * this.width, this.width + 1, this.width + 1);
-                this.ctx.strokeRect(c * this.width, r * this.width, this.width + 1, this.width + 1);
-            }
-        }
-        this.drawStartAndEnd();
-    },
-
-    drawTile(tile, visited) {
-        let [r, c] = tile;
-        this.ctx.fillStyle = EMPTY_COLOR;
-        this.ctx.strokeStyle = WALL_COLOR;
-        this.ctx.lineWidth = .5;
-        if(this.grid[r][c] == 1) {
-            this.ctx.fillStyle = WALL_COLOR;
-        }
-        if(typeof visited !== 'undefined' && visited.has([r, c].toString())) {
-            this.ctx.fillStyle = VISITED_COLOR;
-        }
-        this.ctx.fillRect(c * this.width, r * this.width, this.width, this.width);
-        this.ctx.strokeRect(c * this.width, r * this.width, this.width, this.width);
-        if(arrayEquals(this.start, tile) || arrayEquals(this.end, tile)) {
-            this.drawStartAndEnd();
-        }
-    },
-
-    drawStartAndEnd() {
-        const drawCircle = (tile, color) => {
-            this.ctx.beginPath();
-            this.ctx.arc(tile[1] * this.width + this.width / 2, tile[0] * this.width + this.width / 2, this.width / 2.5, 0, Math.PI * 2);
-            this.ctx.fillStyle = color;
-            this.ctx.fill();
-        }
-        drawCircle(this.start, START_COLOR, this.width / 2.5);
-        drawCircle(this.end, END_COLOR, this.width / 2.5);
-    },
-
-    drawPath(path) {
-        let middle = .35;
-        let edge = (1 - middle) / 2;
-        this.ctx.fillStyle = PATH_COLOR;
-        let w = this.width;
-        for(let i = 0; i < path.length - 1; i++) {
-            let curr = path[i];
-            let next = path[i + 1];
-            let [r, c] = curr;
-            let direction = [curr[0] - next[0], curr[1] - next[1]];
-            // left
-            if(arrayEquals(direction, [0, 1])) {
-                this.ctx.fillRect((c - edge) * w, (r + edge) * w, (2 * edge + middle) * w + 1, middle * w + 1);
-            };
-            // right
-            if(arrayEquals(direction, [0, -1])) {
-                this.ctx.fillRect((c + edge) * w, (r + edge) * w, (2 * edge + middle) * w + 1, middle * w + 1);
-            };
-            // down
-            if(arrayEquals(direction, [-1, 0])) {
-                this.ctx.fillRect((c + edge) * w, (r + edge) * w, middle * w + 1, (2 * edge + middle) * w + 1);
-            };
-            // up
-            if(arrayEquals(direction, [1, 0])) {
-                this.ctx.fillRect((c + edge) * w, (r - edge) * w, middle * w + 1, (2 * edge + middle) * w + 1);
-            };
-        }
-        this.drawStartAndEnd();
-    },
-
-    checkMovable(curr) {
-        let [r, c] = curr;
-        return 0 <= r && r < this.grid.length &&
-               0 <= c && c < this.grid[0].length &&
-               this.grid[r][c] == 0;
-    },
-
-    getAdjs(tile) {
-        let [r, c] = tile;
-        let possAdjs = [[r - 1, c], [r, c + 1], [r + 1, c], [r, c - 1]];
-        return possAdjs.filter((possAdj) => this.checkMovable(possAdj));
-    },
-
-    async clearTimeout() {
-        clearTimeout(this.timeoutID);
-    },
-
-    async simpleSearch(type, delay) {
-        console.assert(type === "depth" || type === "breadth");
-        this.clearTimeout();
-        this.drawAll();
-        let deque = [[this.start]];
-        let visited = new Set();
-        const searchStep = (delay, deque, visited, type) => {
-            if(deque.length == 0) {
-                return;
-            }
-            let path;
-            if(type === "depth") {
-                path = deque.pop();
-            }
-            else {
-                path = deque.shift();
-            }
-            let curr = path[path.length - 1];
-            if(visited.has(curr.toString())) {
-                return searchStep(delay, deque, visited, type);
-            }
-            visited.add(curr.toString());
-            this.drawTile(curr, visited);
-    
-            if(arrayEquals(curr, this.end)) {
-                this.drawPath(path);
-                return path;
-            }
-            // TODO maybe reverse for depth or breadth
-            for(const adj of this.getAdjs(curr)) {
-                deque.push([...path, adj]);
-            }
-            return new Promise((resolve) => this.timeoutID = setTimeout(() => resolve(searchStep(delay, deque, visited, type)), delay));
-        }
-        return await searchStep(delay, deque, visited, type);
-    },
-
-    async aStar(delay) {
-        this.clearTimeout();
-        this.drawAll();
-        const reconstructPath = (prev, tile) => {
-            let current = tile;
-            let path = [current];
-            while(current in prev) {
-                current = prev[current]
-                path.unshift(current)
-            }
-            return path
-        }
-
-        const euclidDist = (tile) => Math.sqrt(Math.pow(this.end[0] - tile[0], 2) + Math.pow(this.end[1] - tile[1], 2));
-        const taxiCab = (tile) => Math.abs(this.end[0] - tile[0]) + Math.abs(this.end[1] - tile[1]);
-
-        let pq = [[0, this.start]];
-        console.log(pq);
-        let dist = {};
-        let prev = {};
-        let visited = new Set();
-        for(let r = 0; r < this.grid.length; r++) {
-            for(let c = 0; c < this.grid[0].length; c++) {
-                dist[[r, c]] = Infinity;
-            }
-        }
-        dist[this.start] = 0;
-        const searchStep = (delay, visited, pq, dist, prev) => {
-            if(pq.length === 0) {
-                return;
-            }
-            pq = pq.sort((a, b) => a[0] - b[0]);
-            let [currDist, currTile] = pq[0];
-            pq.splice(0, 1);
-            console.log(`currTile: ${currTile} currDist: ${currDist}`);
-            if(visited.has(currTile.toString())) {
-                return searchStep(delay, visited, pq, dist, prev);
-            }
-            visited.add(currTile.toString());
-            this.drawTile(currTile, visited);
-            if(arrayEquals(currTile, this.end)) {
-                let path = reconstructPath(prev, currTile)
-                this.drawPath(path);
-                return path;
-            }
-            for(const adj of this.getAdjs(currTile)) {
-                let newDist = dist[currTile] + 1;
-                if(newDist < dist[adj]) {
-                    dist[adj] = newDist;
-                    prev[adj] = currTile;
-                    let newEstimatedDist = newDist + taxiCab(adj);
-                    // console.log(`taxi cab of ${adj}: ${taxiCab(adj)}`);
-                    // console.log(`euclid dist of ${adj}: ${euclidDist(adj)}`);
-                    // console.log(`newMinDistFromStart: ${newMinDistFromStart}`);
-                    // console.log(`new estimated dist: ${newEstimatedDist}`);
-                    console.log(`adding ${adj} with priority ${newEstimatedDist}`);
-                    pq.unshift([newEstimatedDist, adj]);
-                }
-            }
-            return new Promise((resolve) => this.timeoutID = setTimeout(() => resolve(searchStep(delay, visited, pq, dist, prev)), delay));
-        }
-        return await searchStep(delay, visited, pq, dist, prev);
-    },
-
-    getGenerationAdjs(curr) {
-        let [r, c] = curr;
-        let possPairs = [
-            [[r - 1, c], [r - 2, c]],
-            [[r, c + 1], [r, c + 2]], 
-            [[r + 1, c], [r + 2, c]],
-            [[r, c - 1], [r, c - 2]]
-        ];
-        possPairs = possPairs.filter((possPair) => this.checkMovable(possPair[1]))
-
-        for (let i = possPairs.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [possPairs[i], possPairs[j]] = [possPairs[j], possPairs[i]];
-        };
-        return possPairs;
-    },
-
-    async generate(size, delay) {
-        this.clearTimeout();
-        this.setProperties(...prepareMaze(size));
-        let genStart = generateRandomEvenCoord(this.grid.length);
-        let stack = [[genStart, genStart]];
-        let visited = new Set();
-        const generateStep = (stack, visited, delay) => {
-            if(stack.length == 0) {
-                return "Done generating"; 
-            }
-            let [wall, curr] = stack.pop();
-            if(visited.has(curr.toString())) {
-                return generateStep(stack, visited, delay);;
-            }
-            // console.log(`visiting ${curr}`)
-            visited.add(curr.toString());
-            this.grid[wall[0]][wall[1]] = 0;
-            this.drawAll();
-            for(const pair of this.getGenerationAdjs(curr)) {
-                stack.push(pair);
-            }
-            return new Promise((resolve) => this.timeoutID = setTimeout(() => resolve(generateStep(stack, visited, delay)), delay));
-        }
-        return await generateStep(stack, visited, delay);
-    },
-
-    click(x, y, mode, editTabButton) {
-        if(!editTabButton.className.includes("clicked")) {
-            return;
-        }
-        let r = Math.floor(y / parseFloat(getComputedStyle(this.canvas).height) * this.grid.length);
-        let c = Math.floor(x / parseFloat(getComputedStyle(this.canvas).width) * this.grid.length);
-        if(mode == 0 && this.grid[r][c] != 1) {
-            this.clearTimeout();
-            this.grid[r][c] = 1;
-            this.drawAll();
-        }
-        else if(mode == 1 && this.grid[r][c] != 0) {
-            this.clearTimeout();
-            this.grid[r][c] = 0;
-            this.drawAll();
-        }
-        else if(mode == 2 && this.grid[r][c] == 0) {
-            this.clearTimeout();
-            this.start = [r, c];
-            this.drawAll();
-        }
-        else if(mode == 3 && this.grid[r][c] == 0) {
-            this.clearTimeout();
-            this.end = [r, c];
-            this.drawAll();
-        }
-    }
-}
-
-function generateRandomEvenCoord(size) {
-    const generateRandomEvenNumber = () => Math.floor(Math.random() * Math.floor((size + 1) / 2)) * 2;
-    let r = generateRandomEvenNumber();
-    let c = generateRandomEvenNumber();
-    return [r, c];
-}
-
-function prepareMaze(size) {
-    // console.assert(size % 2 === 1);
-    if(size % 2 != 1) {
-        size -= 1;
-    }
-    let grid = [];
-    for(let r = 0; r < size; r++) {
-        let row = [];
-        for(let c = 0; c < size; c++) {
-            if(r % 2 === 0 && c % 2 === 0) {
-                row.push(0);
-            }
-            else {
-                row.push(1);
-            }
-        }
-        grid.push(row);
-    }
-    let start = generateRandomEvenCoord(size);
-    let end = generateRandomEvenCoord(size);
-    while(arrayEquals(start, end)) {
-        end = generateRandomEvenCoord(size);
-    }
-    return [grid, start, end];
-}
-
-function emptyMaze(size) {
-    let grid = Array(size).fill().map(() => Array(size).fill(0));
+function empty_maze(size) {
+    let grid = square_array(size, false);
     let start = [0, 0];
     let end = [size - 1, size - 1];
     return [grid, start, end];
 }
 
-function arrayEquals(a, b) {
-    return Array.isArray(a) &&
-      Array.isArray(b) &&
-      a.length === b.length &&
-      a.every((val, index) => val === b[index]);
-}
-
-function initMaze() {
+function init_maze() {
     let canvas = document.querySelector("canvas");
     let ctx = canvas.getContext("2d");
     let maze = new Maze(canvas, ctx);
@@ -362,21 +34,14 @@ function initMaze() {
         [1, 1, 0, 1, 0, 1, 0],
         [0, 0, 0, 0, 0, 1, 0],
     ];
-    let grid2 = [
-        [0, 0, 0, 0, 0],
-        [0, 0, 0, 1, 0],
-        [0, 0, 0, 1, 0],
-        [0, 0, 0, 1, 0],
-        [0, 0, 0, 1, 0]
-    ];
     let start = [0, 0];
     let end = [0, 5];
-    maze.setProperties(grid, start, end);
-    maze.drawAll();
+    maze.set_properties(grid, start, end);
+    maze.draw_all();
     return [canvas, maze];
 }
 
-function checkValidGridSizeInput(input) {
+function valid_grid_size(input) {
     let num = Number(input.value);
     if(Number.isInteger(num) && num >= 3) {
         input.style.backgroundColor = "white";
@@ -389,84 +54,84 @@ function checkValidGridSizeInput(input) {
     }
 }
 
-function initControls(canvas, maze) {
-    let searchTabButton = document.getElementById("searchTabButton");
-    let editTabButton = document.getElementById("editTabButton");
-    let newMazeTabButton = document.getElementById("newMazeTabButton");
-    let emptyButton = document.getElementById("emptyButton");
-    let generateButton = document.getElementById("generateButton");
-    let gridSizeInput = document.getElementById("gridSizeInput")
-    let breadthButton = document.getElementById("breadthButton");
-    let depthButton = document.getElementById("depthButton");
-    let aStarButton = document.getElementById("aStarButton");
+function init_controls(canvas, maze) {
+    let search_tab_button = document.getElementById("search_tab_button");
+    let edit_tab_button = document.getElementById("edit_tab_button");
+    let new_maze_tab_button = document.getElementById("new_maze_tab_button");
 
-    let tabs = document.getElementsByClassName("tab");
-    let tabButtons = document.getElementsByClassName("tabButton");
+    let empty_button = document.getElementById("empty_button");
+    let random_dfs_button = document.getElementById("random_dfs_button");
+    let prims_button = document.getElementById("prims_button");
+    let kruskals_button = document.getElementById("kruskals_button");
+    let grid_size_input = document.getElementById("grid_size_input")
+    let breadth_button = document.getElementById("breadthButton");
+    let depth_button = document.getElementById("depthButton");
+    let a_star_button = document.getElementById("aStarButton");
+
+    let tabs = document.getElementsByClassName("tab_content");
+    let tab_buttons = document.getElementsByClassName("tab_button");
 
     // button events
-    let DELAY = 50;
-    
-    const openTab = (clickedTabName, clickedTabButton) => {
-        if(clickedTabButton.className.includes("clicked")) {
+    const open_tab = (clicked_tab_name, clicked_tab_button) => {
+        if(clicked_tab_button.className.includes("clicked"))
             return;
-        }
-        for(let tab of tabs) {
+        for(let tab of tabs)
             tab.style.display = "none";
-        }
-        document.getElementById(clickedTabName).style.display = "flex";
-        for(let tabButton of tabButtons) {
+        document.getElementById(clicked_tab_name).style.display = "flex";
+        for(let tabButton of tab_buttons)
             tabButton.className = tabButton.className.replace(" clicked", "");
+        clicked_tab_button.className += " clicked";
+        if(clicked_tab_button === edit_tab_button)
+            canvas.style.cursor = "pointer";
+        else
+            canvas.style.cursor = "default";
+    }
+    search_tab_button.addEventListener("click", () => open_tab("search_tab", search_tab_button));
+    edit_tab_button.addEventListener("click", () => open_tab("edit_tab", edit_tab_button));
+    new_maze_tab_button.addEventListener("click", () => open_tab("new_maze_tab", new_maze_tab_button));
+
+    empty_button.addEventListener("click", () => {
+        if(valid_grid_size(grid_size_input)) {
+            maze.clear_timeout();
+            maze.set_properties(...empty_maze(Number(grid_size_input.value)));
+            maze.draw_all();
         }
-        clickedTabButton.className += " clicked";
-        if(clickedTabButton === editTabButton) {
-            canvas.className += " clickable";
-        }
-        else {
-            canvas.className = canvas.className.replace(" clickable", "");
+    });
+    const generate = (func) => {
+        if(valid_grid_size(grid_size_input)) {
+            maze.clear_timeout();
+            func(Number(grid_size_input.value), DELAY);
         }
     }
-    searchTabButton.addEventListener("click", () => openTab("searchContainer", searchTabButton));
-    editTabButton.addEventListener("click", () => openTab("editContainer", editTabButton));
-    newMazeTabButton.addEventListener("click", () => openTab("newMazeContainer", newMazeTabButton));
-
-    emptyButton.addEventListener("click", () => {
-        if(checkValidGridSizeInput(gridSizeInput)) {
-            maze.setProperties(...emptyMaze(Number(gridSizeInput.value), DELAY));
-            maze.drawAll();
-        }
-    });
-    generateButton.addEventListener("click", () => {
-        if(checkValidGridSizeInput(gridSizeInput)) {
-            maze.generate(Number(gridSizeInput.value), DELAY);
-        }
-    });
-    breadthButton.addEventListener("click", () => maze.simpleSearch("breadth", DELAY));
-    depthButton.addEventListener("click", () => maze.simpleSearch("depth", DELAY));
-    aStarButton.addEventListener("click", () => maze.aStar(DELAY));
+    random_dfs_button.addEventListener("click", () => generate(maze.depth.bind(maze)));
+    prims_button.addEventListener("click", () => generate(maze.prims.bind(maze)));
+    kruskals_button.addEventListener("click", () => generate(maze.kruskals.bind(maze)));
+    
+    breadth_button.addEventListener("click", () => maze.simple_search("breadth", DELAY));
+    depth_button.addEventListener("click", () => maze.simple_search("depth", DELAY));
+    a_star_button.addEventListener("click", () => maze.a_star(DELAY));
 
     // mouse events
     let mouseDown = false;
     canvas.addEventListener("mousedown", () => mouseDown = true);
     document.addEventListener("mouseup", () => mouseDown = false);
-    const getMousePos = (e) => {
+    const mouse_pos = (e) => {
         const rect = canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        return [x, y];
+        return [e.clientX - rect.left,  e.clientY - rect.top];
     }
-    const getCheckedRadio = () => {
-        return Number(document.querySelector('input[name="tileSelector"]:checked').value)
+    const checked_radio = () => {
+        return Number(document.querySelector('input[name="tileSelector"]:checked').value);
     }
     canvas.addEventListener("mousemove", (e) => {
         if(mouseDown) {
-            maze.click(...getMousePos(e), getCheckedRadio(), editTabButton);
+            maze.edit(...mouse_pos(e), checked_radio(), edit_tab_button);
         }
     });
-    canvas.addEventListener("click", (e) => maze.click(...getMousePos(e), getCheckedRadio(), editTabButton))
+    canvas.addEventListener("click", (e) => maze.edit(...mouse_pos(e), checked_radio(), edit_tab_button))
 }
 
 function main() {
-    initControls(...initMaze());
+    init_controls(...init_maze());
 }
 
 main();

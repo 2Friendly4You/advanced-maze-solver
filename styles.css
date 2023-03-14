@@ -4,17 +4,15 @@
     --clr-light: #e8e8e8;
     --clr-hover: #ddd;
     --clr-click: #aaa;
+    width: 100%;
+    height: 100%;
 }
 
 * {
     margin: 0;
     padding: 0;
-    font: 15px Arial;
-}
-
-:root {
-    width: 100%;
-    height: 100%;
+    box-sizing: border-box;
+    font: 1em Arial;
 }
 
 body {
@@ -22,83 +20,91 @@ body {
     width: 100%;
     height: 100%;
     display: flex;
-    justify-content: left;
-    align-items: center;
-    /* overflow: hidden; */
 }
 
 canvas {
-    margin: auto;
     background-color: var(--clr-sidebar);
-    z-index: -1;
+    aspect-ratio: 1 / 1;
+    margin: 2em auto;
+    overflow: scroll;
 }
 
-.flexColumn {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.tabButton {
-    border-radius: 0px;
-    margin: 0px !important;
-}
-
-.clicked {
-    background-color: var(--clr-click) !important;
-}
-
-.clickable:hover {
-    cursor: pointer;
-}
-
-.tab {
-    background-color: var(--clr-wall);
-    justify-content: center;
-    width: 75%;
-    height: 50%;
-    border-radius: 15px;
-    padding: 15px 5px;
-    margin: 20px;
-    box-shadow: -3px -3px var(--clr-light);
-}
-
-.left {
+.controls {
     display: flex;
     flex-direction: column;
     height: 100%;
+    width: 200px;
+    min-width: 200px;
 }
 
 .sidebar {
     background-color: var(--clr-sidebar);
     height: 100%;
     justify-content: space-around;
+    display: flex;
+    flex-direction: column;
 }
 
-#modeSelector {
+.clicked {
+    background-color: var(--clr-click) !important;
+}
+
+#tab_selector {
     display: flex;
     flex-direction: row;
+    width: 100%;
 }
 
-#gridSizeInput {
+.tab_button {
+    border-radius: 0px;
+    margin: 0px !important;
+    width: 33%;
+    border: 1px solid var(--clr-sidebar);
+    background-color: white;
+    padding: 5px 10px;
+    text-align: center;
+}
+
+.tab_content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--clr-wall);
+    width: 75%;
+    border-radius: 15px;
+    padding: 15px 5px;
+    margin: auto;
+    box-shadow: -3px -3px var(--clr-light);
+}
+
+.tab_content > *, #grid_size_input {
+    width: 100px !important;
+    margin: 5px;
+}
+
+.tab_content button, .editLabel {
+    background-color: white;
+    padding: 5px 10px;
+    border-radius: 20px;
+    border: none;
+}
+
+#grid_size_input {
     width: 50px;
     margin: 5px 0px;
 }
 
-#gridSizeInputLabel {
+#grid_size_input_label {
     color: white;
 }
 
-#editContainer {
-    display: none;
-}
-
-#newMazeContainer {
-    display: none;
-}
-
-#searchContainer {
+#search_tab {
     display: flex;
+}
+
+#new_maze_tab, #edit_tab {
+    display: none;
 }
 
 #editLabel * {
@@ -106,12 +112,6 @@ canvas {
 }
 
 button, .editLabel {
-    background-color: white;
-    color: black;
-    margin: 5px 0px;
-    padding: 5px 10px;
-    border-radius: 20px;
-    border: none;
     user-select: none;
     cursor: pointer;
 }
@@ -124,28 +124,38 @@ button:active, .editLabel:active {
     background-color: var(--clr-click);
 }
 
-@media (max-width: 800px) {
+@media (max-width: 900px) {
     body {
         flex-direction: column;
     }
-    .left {
-        display: flex;
+    .controls {
         flex-direction: row;
         width: 100%;
+        height: 130px;
+        min-height: 130px;
     }
     .sidebar {
         flex-direction: row;
-        width: 100%;
+        align-items: center;
+        width: 75%;
     }
-    .tab {
+    .tab_content {
         flex-direction: row;
     }
-    .tab * {
+    .tab_content * {
+        width: auto;
         margin: 5px;
     }
-    #modeSelector {
+    .tab_button {
+        width: 100%;
+        height: 33%;
+    }
+    #tab_selector {
+        height: 100%;
+        width: 25%;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
+        align-items: flex-end;
     }
 }
