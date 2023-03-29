@@ -1,4 +1,4 @@
 .history
-LICENSE
-README.md
 .DS_STORE
+.vscode
+node_modules
