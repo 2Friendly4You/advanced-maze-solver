@@ -1,18 +1,9 @@
-// TODO 
-
-// high
-// change start of search to only draw_all if visited is not empty, use existing function inside edit 
-
-// medium
-// general performance, check everything is fast
-
-// low
-// show what click will do when hovered (ghost)
-// options turn gridlines off
-
 import {Maze, square_array} from './maze.js';
 
-const DELAY = 50;
+function getDelayValue() {
+    const delayInput = document.getElementById("delay_input");
+    return Number(delayInput.value);
+}
 
 function empty_maze(size) {
     let grid = square_array(size, false);
@@ -103,16 +94,16 @@ function init_controls(canvas, maze) {
     const generate = (func) => {
         if(valid_grid_size(grid_size_input)) {
             maze.clear_timeout();
-            func(Number(grid_size_input.value), DELAY);
+            func(Number(grid_size_input.value), getDelayValue());
         }
     }
     random_dfs_button.addEventListener("click", () => generate(maze.depth.bind(maze)));
     prims_button.addEventListener("click", () => generate(maze.prims.bind(maze)));
     kruskals_button.addEventListener("click", () => generate(maze.kruskals.bind(maze)));
     
-    breadth_button.addEventListener("click", () => maze.simple_search("breadth", DELAY));
-    depth_button.addEventListener("click", () => maze.simple_search("depth", DELAY));
-    a_star_button.addEventListener("click", () => maze.a_star(DELAY));
+    breadth_button.addEventListener("click", () => maze.simple_search("breadth", getDelayValue()));
+    depth_button.addEventListener("click", () => maze.simple_search("depth", getDelayValue()));
+    a_star_button.addEventListener("click", () => maze.a_star(getDelayValue()));
 
     // mouse events
     let mouseDown = false;

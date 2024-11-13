@@ -124,6 +124,15 @@ button:active, .editLabel:active {
     background-color: var(--clr-click);
 }
 
+#delay_input {
+    width: 50px;
+    margin: 5px 0px;
+}
+
+#delay_input_label {
+    color: white;
+}
+
 @media (max-width: 900px) {
     body {
         flex-direction: column;
